@@ -2,21 +2,11 @@
 
 namespace Alekitto\BTree;
 
-final class BTree implements \Countable, \IteratorAggregate
+class BTree implements \Countable, \IteratorAggregate
 {
     const COMPARISON_EQUAL = 0;
     const COMPARISON_LESSER = -1;
     const COMPARISON_GREATER = 1;
-
-    /**
-     * Comparison function. Should return an integer value:
-     *  - less than 0 if the first argument is smaller than the second
-     *  - greater than 0 if the first argument is bigger then the second
-     *  - 0 if the two arguments are equals.
-     *
-     * @var callable
-     */
-    private $cmpFunction;
 
     /**
      * Tree root node.
@@ -39,12 +29,8 @@ final class BTree implements \Countable, \IteratorAggregate
      */
     private $length;
 
-    public function __construct(callable $cmpFunction = null)
+    public function __construct()
     {
-        $this->cmpFunction = $cmpFunction ?? function ($a, $b): int {
-            return $a <=> $b;
-        };
-
         $this->clear();
     }
 
@@ -110,7 +96,7 @@ final class BTree implements \Countable, \IteratorAggregate
 
             if (0 === $height) { // External node
                 for ($j = 0; $j < $node->m; ++$j) {
-                    $compare = ($this->cmpFunction)($key, $node->children[$j]->key);
+                    $compare = $this->compare($key, $node->children[$j]->key);
 
                     if (0 === $compare) {
                         return $node->children[$j];
@@ -122,7 +108,7 @@ final class BTree implements \Countable, \IteratorAggregate
                 }
             } else { // Internal node
                 for ($j = 0; $j < $node->m; ++$j) {
-                    if ($j + 1 === $node->m || 0 > ($this->cmpFunction)($key, $node->children[$j + 1]->key)) {
+                    if ($j + 1 === $node->m || 0 > $this->compare($key, $node->children[$j + 1]->key)) {
                         $result = $search($node->children[$j]->next, $key, $height - 1);
                         if (null !== $result) {
                             return $result;
@@ -204,7 +190,7 @@ final class BTree implements \Countable, \IteratorAggregate
         $search = function (Node $node, $key, int $height) use (&$search): void {
             if (0 === $height) { // External node
                 for ($j = 0; $j < $node->m; ++$j) {
-                    if (0 === ($this->cmpFunction)($key, $node->children[$j]->key)) {
+                    if (0 === $this->compare($key, $node->children[$j]->key)) {
                         --$this->length;
                         --$node->m;
 
@@ -216,7 +202,7 @@ final class BTree implements \Countable, \IteratorAggregate
                 }
             } else { // Internal node
                 for ($j = 0; $j < $node->m; ++$j) {
-                    if ($j + 1 === $node->m || 0 > ($this->cmpFunction)($key, $node->children[$j + 1]->key)) {
+                    if ($j + 1 === $node->m || 0 > $this->compare($key, $node->children[$j + 1]->key)) {
                         $search($node->children[$j]->next, $key, $height - 1);
 
                         return;
@@ -259,6 +245,22 @@ final class BTree implements \Countable, \IteratorAggregate
     }
 
     /**
+     * Comparison function. Should return an integer value:
+     *  - less than 0 if the first argument is smaller than the second
+     *  - greater than 0 if the first argument is bigger then the second
+     *  - 0 if the two arguments are equals.
+     *
+     * @param mixed $a
+     * @param mixed $b
+     *
+     * @return int
+     */
+    private function compare($a, $b): int
+    {
+        return $a <=> $b;
+    }
+
+    /**
      * Splits a node.
      *
      * @param Node root
@@ -293,7 +295,7 @@ final class BTree implements \Countable, \IteratorAggregate
 
         if (0 === $height) { // External node
             for ($j = 0; $j < $root->m; ++$j) {
-                $compare = ($this->cmpFunction)($key, $root->children[$j]->key);
+                $compare = $this->compare($key, $root->children[$j]->key);
                 if (0 === $compare) {
                     $root->children[$j]->val = $val;
 
@@ -306,7 +308,7 @@ final class BTree implements \Countable, \IteratorAggregate
             }
         } else { // Internal node
             for ($j = 0; $j < $root->m; ++$j) {
-                if (($j + 1 === $root->m) || 0 > ($this->cmpFunction)($key, $root->children[$j + 1]->key)) {
+                if (($j + 1 === $root->m) || 0 > $this->compare($key, $root->children[$j + 1]->key)) {
                     $u = $this->insert($root->children[$j++]->next, $key, $val, $height - 1);
                     if (! $u || true === $u) {
                         return $u;
