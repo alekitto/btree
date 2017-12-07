@@ -1,0 +1,31 @@
+{
+    "name": "alekitto/btree",
+    "type": "library",
+    "require": {
+        "php": ">=7.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.5",
+        "friendsofphp/php-cs-fixer": "^2.8"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alessandro Chitolina",
+            "email": "alekitto@gmail.com"
+        }
+    ],
+    "config": {
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "Alekitto\\BTree\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Alekitto\\BTree\\Tests\\": "tests/"
+        }
+    }
+}
