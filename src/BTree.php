@@ -255,7 +255,7 @@ class BTree implements \Countable, \IteratorAggregate
      *
      * @return int
      */
-    private function compare($a, $b): int
+    protected function compare($a, $b): int
     {
         return $a <=> $b;
     }
